@@ -386,6 +386,8 @@ def main():
             st.warning("Klik START untuk mengaktifkan kamera.")
     with right:
         result_ui(ctx)
+    with st.expander("RTC Debug"):
+        st.json(RTC_CONFIGURATION)
     footer_ui()
 
 if __name__ == "__main__":
