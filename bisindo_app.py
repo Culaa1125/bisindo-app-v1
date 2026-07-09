@@ -131,6 +131,8 @@ def sidebar_ui():
         "motion_high": motion_high,
     }
 
+st.write(RTC_CONFIGURATION)
+
 def camera_ui(settings):
     """
     Menampilkan kamera dan mengirimkan
