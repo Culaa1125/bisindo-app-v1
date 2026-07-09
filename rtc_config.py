@@ -55,5 +55,6 @@ if USERNAME and PASSWORD:
     )
 
 RTC_CONFIGURATION = {
-    "iceServers": ice_servers
+    "iceServers": ice_servers,
+    "iceTransportPolicy": "all",
 }
