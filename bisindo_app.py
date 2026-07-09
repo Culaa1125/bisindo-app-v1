@@ -1,6 +1,3 @@
-from debug_logging import enable_webrtc_debug_logging
-enable_webrtc_debug_logging()
-
 import time
 import streamlit as st
 
