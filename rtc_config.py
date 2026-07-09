@@ -106,7 +106,7 @@ RTC_CONFIGURATION = {
     # hanya lewat TURN. Kalau kamera tetap tidak connect walau
     # "relay", berarti kredensial/kuota TURN yang bermasalah, bukan
     # firewall STUN. Setelah dites, kembalikan ke "all".
-    "iceTransportPolicy": "relay",
+    "iceTransportPolicy": "all",
 }
 
 # Diekspor supaya bisa ditampilkan di sidebar/debug expander
