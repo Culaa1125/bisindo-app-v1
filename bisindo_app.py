@@ -144,12 +144,13 @@ def camera_ui(settings):
         key="bisindo",
         video_processor_factory=BISINDOProcessor,
         rtc_configuration=RTC_CONFIGURATION,
-        async_processing=True,
+        async_processing=False,
+        desired_playing_state=True,
         media_stream_constraints={
             "video": {
-                "width": {"ideal": 1280},
-                "height": {"ideal": 720},
-                "frameRate": {"ideal": 30},
+                "width": 640,
+                "height": 480,
+                "frameRate": 15,
             },
             "audio": False,
         },
