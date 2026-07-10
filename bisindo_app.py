@@ -148,7 +148,6 @@ def camera_ui(settings):
         # supaya frame yang masuk tidak nge-block/menumpuk selagi
         # menunggu inferensi selesai (penting di CPU terbatas).
         async_processing=True,
-        desired_playing_state=True,
         media_stream_constraints={
             "video": {
                 "width": 640,
