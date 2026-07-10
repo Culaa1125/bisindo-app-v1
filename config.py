@@ -46,13 +46,35 @@ LSTM_THRESHOLD = 0.80
 # ======================================================
 # MEDIAPIPE
 # ======================================================
-MODEL_COMPLEXITY = 1
+# model_complexity 0 = paling ringan (cocok untuk CPU terbatas
+# seperti Streamlit Cloud free tier). 1 = lebih akurat tapi ~2x
+# lebih berat. Ganti ke 1 kalau CPU/RAM sudah lega (HF PRO dst).
+MODEL_COMPLEXITY = 0
 MIN_DETECTION_CONFIDENCE = 0.7
 MIN_TRACKING_CONFIDENCE = 0.5
 ENABLE_SEGMENTATION = False
 SMOOTH_SEGMENTATION = False
 REFINE_FACE_LANDMARKS = False
 SMOOTH_LANDMARKS = True
+
+# ======================================================
+# PERFORMANCE (frame skip & downscale)
+# ======================================================
+# Hanya menjalankan MediaPipe + model setiap N frame.
+# Frame yang di-skip akan memakai hasil overlay terakhir,
+# jadi video tetap terlihat mengalir tapi beban CPU turun
+# proporsional (mis. FRAME_SKIP=2 -> beban inferensi ~separuh).
+FRAME_SKIP = 2
+
+# Lebar frame (px) yang dipakai untuk proses MediaPipe.
+# Frame asli tetap dipakai untuk ditampilkan; hanya versi
+# yang dikecilkan yang dikirim ke Holistic (kerja Holistic kira-kira
+# sebanding dengan jumlah piksel, jadi ini penurunan besar).
+PROCESS_WIDTH = 320
+
+# Batasi thread internal TensorFlow/MediaPipe supaya tidak
+# rebutan CPU di environment dengan CPU terbatas (mis. 1 vCPU).
+TF_NUM_THREADS = 1
 
 # ======================================================
 # DRAWING
