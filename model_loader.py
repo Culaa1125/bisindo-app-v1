@@ -14,7 +14,21 @@ from config import (
     LSTM_MODEL_PATH,
     CNN_LABEL_PATH,
     LSTM_LABEL_PATH,
+    TF_NUM_THREADS,
 )
+
+# Batasi thread pool TensorFlow. Di CPU terbatas (mis. 1 vCPU di
+# Streamlit Cloud free tier), TF secara default mencoba memakai semua
+# core untuk tiap inference call, yang malah membuat context-switching
+# overhead dan bentrok dengan thread MediaPipe. Ini harus dipanggil
+# sebelum operasi TF pertama.
+try:
+    tf.config.threading.set_intra_op_parallelism_threads(TF_NUM_THREADS)
+    tf.config.threading.set_inter_op_parallelism_threads(TF_NUM_THREADS)
+except RuntimeError:
+    # Sudah ada operasi TF yang berjalan (mis. karena Streamlit rerun) -
+    # abaikan saja, setting sebelumnya tetap berlaku.
+    pass
 
 
 class ModelManager:
