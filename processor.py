@@ -20,6 +20,8 @@ from detectors import (
 
 from inference import InferenceEngine
 
+from config import FRAME_SKIP, PROCESS_WIDTH
+
 class BISINDOProcessor(VideoProcessorBase):
 
     def __init__(self):
@@ -33,6 +35,13 @@ class BISINDOProcessor(VideoProcessorBase):
         self.confidence = 0.0
         self.last_time = time.time()
         self.fps = 0
+
+        # Frame-skip: hanya jalankan Holistic + model setiap
+        # FRAME_SKIP frame. Frame yang di-skip memakai hasil
+        # deteksi (landmark) terakhir untuk digambar, jadi video
+        # tetap terlihat mengalir walau inferensi lebih jarang.
+        self._frame_index = 0
+        self._last_results = None
 
         # Setting dari UI
         self.conf_cnn = 0.80
@@ -332,16 +341,40 @@ class BISINDOProcessor(VideoProcessorBase):
         )
 
     def process_frame(self, frame):
-        results = self.detector.process(frame)
+        self._frame_index += 1
+        do_full_process = (self._frame_index % FRAME_SKIP == 0)
 
-        draw_landmarks(frame, results)
+        if do_full_process:
+            # Downscale sebelum masuk Holistic. Landmark MediaPipe
+            # bersifat koordinat ternormalisasi (0-1), jadi tetap
+            # valid digambar di frame resolusi asli selama aspect
+            # ratio dipertahankan.
+            h, w = frame.shape[:2]
+            if w > PROCESS_WIDTH:
+                scale = PROCESS_WIDTH / w
+                small_frame = cv2.resize(
+                    frame,
+                    (PROCESS_WIDTH, int(h * scale)),
+                    interpolation=cv2.INTER_AREA,
+                )
+            else:
+                small_frame = frame
 
-        if has_hand(results):
-            self.auto_detect(results)
-        else:
-            self.reset_tracking()
+            results = self.detector.process(small_frame)
+            self._last_results = results
 
-        self.sync_result()
+            if has_hand(results):
+                self.auto_detect(results)
+            else:
+                self.reset_tracking()
+
+            self.sync_result()
+
+        # Gambar landmark pakai hasil deteksi terakhir yang tersedia
+        # (baik dari frame ini atau frame sebelumnya yang di-skip).
+        if self._last_results is not None:
+            draw_landmarks(frame, self._last_results)
+
         self.draw_overlay(frame)
 
         return frame
