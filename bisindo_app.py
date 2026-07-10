@@ -11,7 +11,7 @@ from config import (
     MAX_HISTORY,
 )
 
-from rtc_config import RTC_CONFIGURATION, TURN_LOADED, TURN_LOAD_ERROR
+from rtc_config import RTC_CONFIGURATION
 
 def init_page():
     st.set_page_config(
@@ -114,17 +114,15 @@ def sidebar_ui():
 
         st.subheader("🌐 Koneksi WebRTC")
 
-        if TURN_LOAD_ERROR:
-            st.error(f"TURN config error: {TURN_LOAD_ERROR}")
-         
-        if TURN_LOADED:
+        has_turn = any(
+            any("turn:" in url or "turns:" in url for url in server.get("urls", []))
+            for server in RTC_CONFIGURATION["iceServers"]
+        )
+
+        if has_turn:
             st.success("Success: TURN Server Aktif")
         else:
-            st.warning(
-                "Warning: Hanya menggunakan STUN. "
-                "Jika di Streamlit Cloud kamera tidak connect, cek Secrets di "
-                "App Settings -> Secrets."
-            )
+            st.warning("Warning: Hanya menggunakan STUN")
 
     return {
         "conf_cnn": conf_cnn,
@@ -146,13 +144,18 @@ def camera_ui(settings):
         key="bisindo",
         video_processor_factory=BISINDOProcessor,
         rtc_configuration=RTC_CONFIGURATION,
-        async_processing=False,
+        # True: recv() jalan di thread terpisah dari loop utama WebRTC,
+        # supaya frame yang masuk tidak nge-block/menumpuk selagi
+        # menunggu inferensi selesai (penting di CPU terbatas).
+        async_processing=True,
         desired_playing_state=True,
         media_stream_constraints={
             "video": {
                 "width": 640,
                 "height": 480,
-                "frameRate": 15,
+                # 10 fps cukup untuk isyarat tangan dan mengurangi
+                # jumlah frame yang perlu didekode aiortc di server.
+                "frameRate": 10,
             },
             "audio": False,
         },
